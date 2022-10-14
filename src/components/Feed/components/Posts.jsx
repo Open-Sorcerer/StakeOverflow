@@ -1,43 +1,30 @@
-import { useMoralisDapp } from "providers/MoralisDappProvider/MoralisDappProvider";
-import { useMoralisQuery } from "react-moralis";
-import Post from "./Post";
+import { useDapp } from "providers/DappProvider";
+import PillButton from "components/ui/PillButton";
+import Post, { PostSkeleton } from "./Post";
 
-const Posts = () => {
-  const { selectedCategory } = useMoralisDapp();
-  const queryPost = useMoralisQuery(
-    "Posts",
-    (query) =>
-      query
-        .equalTo("categoryId", selectedCategory["categoryId"])
-        .equalTo(
-          "parentId",
-          "0x9100000000000000000000000000000000000000000000000000000000000000"
-        ),
-    [selectedCategory],
-    { live: true }
-  );
+const Posts = ({ posts, isLoading, onAsk }) => {
+  const { selectedCategory } = useDapp();
 
-  const fetchedPosts = JSON.parse(
-    JSON.stringify(queryPost.data, ["postId", "contentId", "postOwner"])
-  ).reverse();
-  const havePosts = fetchedPosts.length > 0 ? true : false;
+  if (isLoading) return [0, 1, 2].map((i) => <PostSkeleton key={i} />);
 
-  const emptyResult = (
-    <div>
-      <h3>Be the first to post here for</h3>
-      <h3>{selectedCategory["category"]} </h3>
-    </div>
-  );
+  if (posts.length === 0) {
+    return (
+      <div className="bezel rise">
+        <div className="bezel-core empty">
+          <span className="eyebrow">{selectedCategory.category}</span>
+          <p className="empty-title">Quiet in here.</p>
+          <p className="empty-copy">
+            No one has asked anything yet. The first question in a topic sets the tone.
+          </p>
+          <PillButton icon="plus" onClick={onAsk}>
+            Ask the first question
+          </PillButton>
+        </div>
+      </div>
+    );
+  }
 
-  const postResult = (
-    <div>
-      {fetchedPosts.map((post) => (
-        <Post key={post["postId"]} post={post} />
-      ))}
-    </div>
-  );
-
-  return havePosts ? postResult : emptyResult;
+  return posts.map((post, index) => <Post key={post.postId} post={post} index={index} />);
 };
 
 export default Posts;

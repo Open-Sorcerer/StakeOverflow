@@ -1,44 +1,27 @@
-import { useMoralisDapp } from "providers/MoralisDappProvider/MoralisDappProvider";
-import { useMoralisQuery, useMoralis, } from "react-moralis";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useDapp } from "providers/DappProvider";
+import { useReputation } from "data";
+import { voteWeight } from "helpers/reputation";
 
 const Reputation = () => {
-    const {Moralis} = useMoralis();
-    const { walletAddress, contractABI, contractAddress, selectedCategory} = useMoralisDapp();
-    const [reputationValue, setReputation] = useState(0);
-    const contractABIJson = JSON.parse(contractABI)
-    
-    const { data: votes } = useMoralisQuery("Votes", (query) => query.equalTo("postOwner", walletAddress), [], {
-        live: true,
-      });
-    
-    const categoryId = selectedCategory["categoryId"]
+  const { selectedCategory } = useDapp();
+  const reputation = useReputation(selectedCategory.categoryId);
+  const weight = reputation === null ? null : voteWeight(reputation);
 
-    const options = {
-        contractAddress: contractAddress,
-        functionName: "getReputation",
-        abi: contractABIJson,
-        params: {
-            _address: walletAddress,
-            _categoryID:categoryId
-        }
-    };
-    
-    useEffect(() => {
-    
-      async function getReputation() {
-        await Moralis.enableWeb3();
-        const result = await Moralis.executeFunction(options);
-        setReputation(result);
-      }
-    
-        getReputation();
-      }, [votes, walletAddress, categoryId]);
+  return (
+    <div className="bezel rise rep-shell">
+      <div className="bezel-core rep-card">
+        <span className="eyebrow">Your reputation</span>
+        <div className="rep-value" key={reputation}>
+          {reputation ?? "–"}
+        </div>
+        <p className="rep-caption">
+          in {selectedCategory.category}.
+          {weight !== null &&
+            ` Your upvotes here add ${weight} ${weight === 1 ? "point" : "points"} to an author's reputation; downvotes take up to ${weight}.`}
+        </p>
+      </div>
+    </div>
+  );
+};
 
-    return (
-        <>{reputationValue}</>
-    )
-}
-
-export default Reputation
+export default Reputation;

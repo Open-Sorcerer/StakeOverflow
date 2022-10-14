@@ -1,29 +1,25 @@
-import { useMoralisQuery } from "react-moralis";
-import Categories from "./Categories"
-import Feed from "./Feed"
+import { useDapp } from "providers/DappProvider";
+import { useCategories } from "data";
+import Categories from "./Categories";
+import Overview from "./Overview";
+import Feed from "./Feed";
 
 const Main = () => {
-    const queryCategories = useMoralisQuery("Categories");
-    const fetchedCategories = JSON.parse(JSON.stringify(queryCategories.data, ["categoryId", "category"]));
+  const { selectedCategory } = useDapp();
+  const { categories, isLoading } = useCategories();
 
-    console.log(fetchedCategories)
-    return (
-        <div className="container">
-            <div style={{
-                display: "flex",
-                fontFamily: "Roboto, sans-serif",
-                color: "#041836",
-                padding: "10px 30px",
-                maxWidth: "1200px",
-                width: "100%",
-                gap: "20px",
-                }}>
-                <Categories categories={fetchedCategories}/>
-                <Feed/>
-            </div>
-            
-        </div>
-    )
-}
+  return (
+    <main className="app-shell">
+      <Categories categories={categories} isLoading={isLoading} />
+      <section aria-live="polite">
+        {selectedCategory ? (
+          <Feed key={selectedCategory.categoryId} />
+        ) : (
+          <Overview categories={categories} isLoading={isLoading} />
+        )}
+      </section>
+    </main>
+  );
+};
 
-export default Main
+export default Main;
