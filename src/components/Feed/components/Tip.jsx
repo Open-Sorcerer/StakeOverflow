@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
 import { parseEther } from "viem";
-import { useDapp } from "providers/DappProvider";
+import { useDapp, useSession } from "providers/DappProvider";
 import { useForumActions } from "data";
 import { sameAddress } from "helpers/content";
 import { getEllipsisTxt } from "helpers/formatters";
@@ -25,7 +25,8 @@ const toWei = (amount) => {
  * donate() function, so this is a plain transfer with nothing recorded on-chain.
  */
 const Tip = ({ post }) => {
-  const { walletAddress } = useDapp();
+  const { walletAddress, isGuest } = useDapp();
+  const { connectWallet } = useSession();
   const { tip } = useForumActions();
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState("");
@@ -73,7 +74,15 @@ const Tip = ({ post }) => {
         className="action"
         disabled={isOwn}
         title={isOwn ? "You can't tip your own post" : `Tip the author in ${SUPPORTED_CHAIN.currency}`}
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          // Tips are real transfers, so a guest is sent to connect a wallet first.
+          if (isGuest) {
+            message.info("Connect a wallet to send tips.");
+            connectWallet();
+            return;
+          }
+          setIsOpen(true);
+        }}
       >
         <Icon name="coin" size={16} />
         Tip

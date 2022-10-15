@@ -1,5 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useSession } from "providers/DappProvider";
+import { useDapp, useSession } from "providers/DappProvider";
 import { SUPPORTED_CHAIN } from "config";
 import { PolygonLogo } from "./Chains/Logos";
 import Blockie from "./Blockie";
@@ -10,7 +10,8 @@ import PillButton from "./ui/PillButton";
  * connect / network / account modals; the pills themselves are ours.
  */
 function Wallet() {
-  const { connect } = useSession();
+  const { connect, isGuest } = useSession();
+  const { walletAddress } = useDapp();
 
   return (
     <ConnectButton.Custom>
@@ -19,6 +20,14 @@ function Wallet() {
         if (!mounted) return <span aria-hidden="true" style={{ visibility: "hidden" }} />;
 
         if (!account || !chain) {
+          if (isGuest) {
+            return (
+              <button type="button" className="pill" onClick={connect}>
+                <Blockie address={walletAddress} scale={2.5} />
+                <span className="guest-label">Guest</span>
+              </button>
+            );
+          }
           return (
             <PillButton size="sm" icon="wallet" onClick={connect}>
               Connect<span className="account-label"> wallet</span>

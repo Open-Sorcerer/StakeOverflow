@@ -1,14 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import { useDapp } from "providers/DappProvider";
 import Logo from "./ui/Logo";
 import Wallet from "./Wallet";
+import { useOpenTopic } from "./navigation";
 
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
 function Nav() {
   const { pathname } = useLocation();
-  const { setSelectedCategory } = useDapp();
+  const openTopic = useOpenTopic();
   const onLanding = !pathname.startsWith("/app");
 
   return (
@@ -16,7 +16,7 @@ function Nav() {
       <div className="nav-brand">
         <Link
           to="/"
-          onClick={() => setSelectedCategory(null)}
+          onClick={() => openTopic(null)}
           aria-label="StakeOverflow home"
         >
           <Logo />

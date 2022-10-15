@@ -5,10 +5,18 @@ import PillButton from "components/ui/PillButton";
 import Composer from "./components/Composer";
 import Posts from "./components/Posts";
 
+const SORTS = [
+  { id: "newest", label: "Newest", meta: "newest first" },
+  { id: "top", label: "Top", meta: "most votes first" },
+  { id: "unanswered", label: "Unanswered", meta: "waiting for a reply" },
+];
+
 const Feed = () => {
   const { selectedCategory } = useDapp();
-  const { posts, isLoading } = usePosts(selectedCategory.categoryId);
+  const [sort, setSort] = useState("newest");
+  const { posts, isLoading } = usePosts(selectedCategory.categoryId, sort);
   const [isComposing, setIsComposing] = useState(false);
+  const current = SORTS.find((option) => option.id === sort);
 
   return (
     <>
@@ -19,7 +27,7 @@ const Feed = () => {
           <p className="feed-meta">
             {isLoading
               ? "Loading questions…"
-              : `${posts.length} ${posts.length === 1 ? "question" : "questions"} · newest first`}
+              : `${posts.length} ${posts.length === 1 ? "question" : "questions"} · ${current.meta}`}
           </p>
         </div>
         <PillButton
@@ -31,9 +39,38 @@ const Feed = () => {
         </PillButton>
       </header>
 
-      <div className="stack">
+      <div className="feed-toolbar rise">
+        <div className="segmented" role="tablist" aria-label="Sort questions">
+          {SORTS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              role="tab"
+              aria-selected={sort === option.id}
+              className={sort === option.id ? "is-active" : ""}
+              onClick={() => setSort(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="stack" key={sort}>
         {isComposing && <Composer onDone={() => setIsComposing(false)} />}
-        <Posts posts={posts} isLoading={isLoading} onAsk={() => setIsComposing(true)} />
+        <Posts
+          posts={posts}
+          isLoading={isLoading}
+          onAsk={() => setIsComposing(true)}
+          empty={
+            sort === "unanswered"
+              ? {
+                  title: "All caught up.",
+                  copy: "Every question in this topic has at least one reply.",
+                }
+              : undefined
+          }
+        />
       </div>
     </>
   );

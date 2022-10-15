@@ -12,4 +12,7 @@ export {
   usePostVotes,
   useReputation,
   useForumActions,
+  useSearch,
+  useProfile,
+  ACCEPT_REWARD,
 } from "./store";

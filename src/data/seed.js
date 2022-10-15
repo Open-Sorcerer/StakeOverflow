@@ -21,6 +21,7 @@ const categories = [
 
 const minutesAgo = (minutes) => new Date(Date.now() - minutes * 60 * 1000);
 
+/** Sample threads. Content is markdown; `accepted` marks the question's accepted answer. */
 const thread = [
   {
     id: "p1",
@@ -30,21 +31,21 @@ const thread = [
     votes: 21,
     title: "Mumbai is gone. What's the cleanest migration path to Amoy?",
     content:
-      "Our contract and all of its event history live on Mumbai. Do we redeploy and start fresh, or is there a sane way to replay state onto Amoy so reputation isn't lost?",
+      "Our contract and all of its event history live on **Mumbai**. Do we redeploy and start fresh, or is there a sane way to replay state onto Amoy so reputation isn't lost?",
     replies: [
       {
         owner: people.ada,
         age: 31,
         votes: 9,
         content:
-          "Redeploy, then replay. Index the old events once from an archive node, then seed the new contract through an owner-only migrate() you renounce afterwards. Cheaper than it sounds on Amoy.",
+          "Redeploy, then replay:\n\n1. Index the old events once from an archive node.\n2. Seed the new contract through an owner-only `migrate()`.\n3. Renounce ownership afterwards.\n\nCheaper than it sounds on Amoy.",
       },
       {
         owner: people.kai,
         age: 12,
         votes: 4,
         content:
-          "If you only need reputation, snapshot it into a Merkle root and let people claim it. You skip writing thousands of storage slots yourself.",
+          "If you only need reputation, snapshot it into a **Merkle root** and let people claim it. You skip writing thousands of storage slots yourself.",
       },
     ],
   },
@@ -56,14 +57,15 @@ const thread = [
     votes: 14,
     title: "abi.encode vs abi.encodePacked when hashing post IDs: is collision a real risk?",
     content:
-      "I derive post IDs as keccak256(abi.encodePacked(owner, parentId, contentId)). All three are fixed-size, so is encodePacked actually safe here, or should I switch to abi.encode anyway?",
+      "I derive post IDs like this:\n\n```solidity\nbytes32 postId = keccak256(abi.encodePacked(owner, parentId, contentId));\n```\n\nAll three are fixed-size. Is `encodePacked` actually safe here, or should I switch to `abi.encode` anyway?",
     replies: [
       {
         owner: people.noor,
         age: 70,
         votes: 11,
+        accepted: true,
         content:
-          "With only fixed-size types, encodePacked can't collide: there's no ambiguity about where one field ends. The danger is two dynamic types side by side (string, bytes). Your case is fine.",
+          "With only fixed-size types, `encodePacked` can't collide: there's no ambiguity about where one field ends. The danger is two **dynamic** types side by side:\n\n```solidity\n// \"ab\" + \"c\" and \"a\" + \"bc\" pack to the same bytes\nkeccak256(abi.encodePacked(stringA, stringB));\n```\n\nYour case is fine.",
       },
     ],
   },
@@ -75,14 +77,14 @@ const thread = [
     votes: 17,
     title: "Can reputation be proven without revealing which wallet earned it?",
     content:
-      "I want users to prove \"I have 50+ reputation in Solidity\" to unlock a role, without linking their main wallet. Semaphore-style group membership, or something lighter?",
+      'I want users to prove "I have 50+ reputation in Solidity" to unlock a role, without linking their main wallet. Semaphore-style group membership, or something lighter?',
     replies: [
       {
         owner: people.ada,
         age: 200,
         votes: 6,
         content:
-          "Publish a Merkle tree of (commitment, reputation bucket) per epoch. A Semaphore proof of membership in the 50+ bucket gives you exactly that, and the nullifier stops double-claims.",
+          "Publish a Merkle tree of `(commitment, reputationBucket)` per epoch. A Semaphore proof of membership in the 50+ bucket gives you exactly that, and the **nullifier** stops double-claims.",
       },
     ],
   },
@@ -111,8 +113,9 @@ const thread = [
         owner: people.lin,
         age: 9,
         votes: 3,
+        accepted: true,
         content:
-          "Yes. Key the pending item by tx hash, then swap it for the indexed row when the event lands. Show a quiet \"confirming\" badge rather than a blocking spinner.",
+          'Yes. Key the pending item by tx hash, then swap it for the indexed row when the event lands:\n\n```js\nconst hash = await writeContractAsync(request);\naddPending({ hash, ...draft });\n\nawait waitForTransactionReceipt(config, { hash });\nremovePending(hash);\n```\n\nShow a quiet "confirming" badge rather than a blocking spinner.',
       },
     ],
   },
@@ -124,7 +127,7 @@ const thread = [
     votes: 6,
     title: "Why does voteDown let me vote on my own post when voteUp doesn't?",
     content:
-      "voteUp has require(owner != msg.sender) but voteDown doesn't. Is that intentional, a way to retract your own answer?",
+      "`voteUp` has this check:\n\n```solidity\nrequire(postRegistry[_postId].postOwner != _voter, \"you cannot vote your own posts\");\n```\n\nbut `voteDown` doesn't. Is that intentional, a way to retract your own answer?",
     replies: [],
   },
   {
@@ -135,26 +138,38 @@ const thread = [
     votes: 8,
     title: "Handling accountsChanged mid-session without a full reload",
     content:
-      "When a user switches accounts in their wallet, my cached \"already voted\" state still belongs to the old address. What's the clean pattern here?",
+      'When a user switches accounts in their wallet, my cached "already voted" state still belongs to the old address. What\'s the clean pattern here?',
     replies: [
       {
         owner: people.ravi,
         age: 2900,
         votes: 5,
+        accepted: true,
         content:
-          "Derive per-user state from the address instead of storing it. Key queries by the lowercased address and everything recomputes on its own.",
+          "Derive per-user state from the address instead of storing it. Key queries by the **lowercased** address and everything recomputes on its own:\n\n```js\nconst { address } = useAccount();\nconst myVote = votes[address?.toLowerCase()];\n```",
       },
     ],
   },
 ];
 
-/** Reputation a newly connected wallet starts with in each topic, so the sidebar isn't empty. */
+/** Reputation a newly connected wallet or guest starts with in each topic, so the sidebar isn't empty. */
 export const VIEWER_REPUTATION = { "0xc1": 12, "0xc2": 3, "0xc5": 7 };
+
+/** Sample authors' reputation per topic, so their profiles aren't empty. */
+const AUTHOR_REPUTATION = {
+  [people.ada]: { "0xc1": 41, "0xc4": 18, "0xc2": 9, "0xc6": 6 },
+  [people.lin]: { "0xc2": 26, "0xc5": 14 },
+  [people.ravi]: { "0xc1": 22, "0xc6": 15 },
+  [people.noor]: { "0xc1": 33, "0xc4": 27 },
+  [people.kai]: { "0xc3": 19, "0xc2": 11, "0xc1": 4 },
+  [people.sam]: { "0xc5": 8 },
+};
 
 export function createSeedState() {
   const posts = {};
   thread.forEach((question) => {
     const postId = `0x${question.id}`;
+    const acceptedIndex = question.replies.findIndex((reply) => reply.accepted);
     posts[postId] = {
       postId,
       parentId: ROOT_PARENT_ID,
@@ -165,6 +180,7 @@ export function createSeedState() {
       content: { title: question.title, content: question.content },
       votes: question.votes,
       voters: {},
+      acceptedReplyId: acceptedIndex >= 0 ? `${postId}r${acceptedIndex}` : null,
     };
     question.replies.forEach((reply, index) => {
       const replyId = `${postId}r${index}`;
@@ -182,12 +198,13 @@ export function createSeedState() {
     });
   });
 
-  return {
-    categories,
-    posts,
-    // Per-address, per-topic reputation. Sample authors start at 0.
-    reputation: {},
-  };
+  const reputation = {};
+  Object.entries(AUTHOR_REPUTATION).forEach(([address, byTopic]) => {
+    reputation[address.toLowerCase()] = { ...byTopic };
+  });
+
+  // Per-address, per-topic reputation.
+  return { categories, posts, reputation };
 }
 
 /** A handful of questions for the landing page preview. */

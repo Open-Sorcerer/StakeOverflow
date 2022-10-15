@@ -3,6 +3,7 @@ import { useSession } from "providers/DappProvider";
 import Nav from "components/Nav";
 import Landing from "components/Landing";
 import Main from "components/Main";
+import SignIn from "components/SignIn";
 import Icon from "components/ui/Icon";
 import "./style.css";
 
@@ -15,6 +16,7 @@ const App = () => {
       <div className="grain" aria-hidden="true" />
       <div className="page">
         <Nav />
+        <SignIn />
         {/* Wait for wagmi to restore a previous connection before deciding where to route. */}
         {isRestoring && (
           <div className="restoring" role="status" aria-label="Reconnecting your wallet">

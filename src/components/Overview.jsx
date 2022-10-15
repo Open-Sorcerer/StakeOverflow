@@ -1,8 +1,8 @@
-import { useDapp } from "providers/DappProvider";
 import Icon from "./ui/Icon";
+import { useOpenTopic } from "./navigation";
 
 const Overview = ({ categories, isLoading }) => {
-  const { setSelectedCategory } = useDapp();
+  const openTopic = useOpenTopic();
   // The first tile spans two columns; the last one stretches to close its row.
   const lastSpan = 3 - (categories.length % 3);
 
@@ -38,7 +38,7 @@ const Overview = ({ categories, isLoading }) => {
               key={category.categoryId}
               className={`bezel tile rise ${index === categories.length - 1 ? "is-last" : ""}`}
               style={{ animationDelay: `${index * 70}ms`, "--last-span": lastSpan }}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => openTopic(category)}
             >
               <div className="bezel-core">
                 <span className="card-kicker">{String(index + 1).padStart(2, "0")}</span>

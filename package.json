@@ -7,10 +7,15 @@
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.104.2",
     "antd": "^4.16.13",
+    "highlightjs-solidity": "^2.0.6",
+    "lowlight": "^3.3.0",
     "react": "^18.3.1",
     "react-blockies": "^1.4.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^5.3.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
     "viem": "^2.57.7",
     "wagmi": "^2.19.5"
   },
@@ -22,7 +27,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "vite": "^8.3.4",
-    "@vitejs/plugin-react": "^6.1.2"
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4"
   }
 }

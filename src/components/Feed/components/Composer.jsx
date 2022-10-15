@@ -5,6 +5,7 @@ import { useForumActions } from "data";
 import { readableError } from "helpers/errors";
 import Icon from "components/ui/Icon";
 import PillButton from "components/ui/PillButton";
+import Markdown from "components/ui/Markdown";
 
 /** Writes a question, or a reply when `parentId` is given. */
 const Composer = ({ parentId, onDone }) => {
@@ -17,6 +18,7 @@ const Composer = ({ parentId, onDone }) => {
   const [preview, setPreview] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(0);
   const [stage, setStage] = useState(null);
+  const [mode, setMode] = useState("write");
 
   useEffect(() => {
     if (!file) {
@@ -62,6 +64,7 @@ const Composer = ({ parentId, onDone }) => {
     setStage(null);
     setTitle("");
     setContent("");
+    setMode("write");
     clearFile();
     message.success(isReply ? "Reply published" : "Question published");
     onDone?.();
@@ -80,6 +83,34 @@ const Composer = ({ parentId, onDone }) => {
             autoFocus
           />
         )}
+        <div className="composer-tabs">
+          <div className="segmented" role="tablist" aria-label="Editor mode">
+            {["write", "preview"].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={mode === tab}
+                className={mode === tab ? "is-active" : ""}
+                onClick={() => setMode(tab)}
+              >
+                {tab === "write" ? "Write" : "Preview"}
+              </button>
+            ))}
+          </div>
+          <span className="composer-hint">
+            Markdown supported · <code>```solidity</code> for code
+          </span>
+        </div>
+        {mode === "preview" ? (
+          <div className="composer-render">
+            {content.trim() ? (
+              <Markdown className="post-body">{content}</Markdown>
+            ) : (
+              <p className="composer-empty">Nothing to preview yet.</p>
+            )}
+          </div>
+        ) : (
         <textarea
           className="field field-body"
           placeholder={
@@ -93,6 +124,7 @@ const Composer = ({ parentId, onDone }) => {
           aria-label={isReply ? "Reply" : "Question details"}
           autoFocus={isReply}
         />
+        )}
 
         {preview && (
           <div className="composer-preview rise">

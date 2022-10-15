@@ -9,6 +9,9 @@ For the original pitch, read the pitch deck (`Stack Overflow On-Chain.pdf`).
 - **Ask:** a post's content is pinned to IPFS and its URI is written to the contract with `createPost`.
 - **Vote:** `voteUp` / `voteDown` move the author's reputation in that topic. Each vote carries ⌊log₂⌋ of the voter's own reputation in the topic, the maximum the contract allows (1 point below 4 reputation). Downvotes stop at 0.
 - **Tip:** native POL goes straight from your wallet to the author's.
+- **Accept:** the asker marks the reply that solved it. The accepted answer leads its thread, the question shows as Solved, and the answer's author gains 5 reputation in the topic.
+
+Posts support GitHub-flavoured markdown with highlighted code blocks (Solidity included). Topics sort by newest, top or unanswered; search covers every topic (press `/`); and every address has a profile with its reputation per topic, questions and answers.
 
 ## Stack
 
@@ -16,7 +19,7 @@ React 18 on Vite, with [wagmi](https://wagmi.sh) + [viem](https://viem.sh) for t
 
 ## Running the app
 
-Prerequisites: Git, Node.js 20.19+ or 22.12+, npm, and a browser wallet. Testnet POL for tipping is available from the [Polygon faucet](https://faucet.polygon.technology/).
+Prerequisites: Git, Node.js 20.19+ or 22.12+ and npm. A browser wallet is optional: you can try everything except tips as a guest. Testnet POL for tipping is available from the [Polygon faucet](https://faucet.polygon.technology/).
 
 ```bash
 git clone https://github.com/Open-Sorcerer/DeStackOverflow
@@ -25,7 +28,7 @@ npm install
 npm start
 ```
 
-The app runs at `http://localhost:3000`.
+The app runs at `http://localhost:3000`. "Connect wallet" offers two ways in: connect a real wallet, or continue as a guest. A guest gets a temporary identity for the browser tab and can ask, answer and vote, but needs a wallet to send tips.
 
 **Phone wallets (optional).** To let people connect phone wallets by QR code through WalletConnect, get a free project ID at [dashboard.reown.com](https://dashboard.reown.com) and set it in `.env`:
 
@@ -46,4 +49,4 @@ Without it, the connect modal offers installed browser wallets only.
 
 - Redeploy the contract to Polygon Amoy and back the `src/data` hooks with it
 - Record tips on-chain with a `donate` function
-- Add a search function
+- Add accepted answers to the contract (today they live in the in-memory store)
